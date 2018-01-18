@@ -105,14 +105,9 @@ public class PlayerController : MonoBehaviour {
         //melee attack
         if (Input.GetButtonDown("Melee"))
         {
-            if (facingRight)
-            {
+            
                 attack(attackHitboxes[0]);
-            }
-            else if (facingRight == false)
-            {
-                attack(attackHitboxes[1]);
-            }
+                       
         }
 
 
