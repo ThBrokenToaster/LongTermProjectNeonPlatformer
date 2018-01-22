@@ -6,8 +6,6 @@ public class PickUp : MonoBehaviour {
 
     public float healthAmount = 1;
 
-
-
     // Use this for initialization
     void Start() {
 

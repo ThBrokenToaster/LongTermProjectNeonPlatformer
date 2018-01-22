@@ -42,7 +42,6 @@ public class PlayerHealth : MonoBehaviour {
             damagedEffect.color = Color.Lerp(damagedEffect.color, Color.clear, smoothColor * Time.deltaTime);
         }
         damaged = false;
-
     }
 
     public void doDamage(float damage) {
@@ -56,7 +55,6 @@ public class PlayerHealth : MonoBehaviour {
                 kill();
             }
         }
-
     }
 
     public void heal(float amount) {

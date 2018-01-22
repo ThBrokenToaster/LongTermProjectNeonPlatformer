@@ -40,7 +40,6 @@ public class PlayerController : MonoBehaviour {
         facingRight = true;
     }
 
-
     void FixedUpdate() {
         grounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
         playerAnim.SetBool("isGrounded", grounded);

@@ -17,7 +17,6 @@ public class projectileController : MonoBehaviour {
         } else {
             proRB.AddForce(new Vector2(1, 0) * projectileSpeed, ForceMode2D.Impulse);
         }
-
     }
 
     // Update is called once per frame
