@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -27,33 +27,27 @@ public class EnemyMovement : MonoBehaviour {
     Rigidbody2D enemyRB;
 
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start() {
         enemyAnimator = GetComponentInChildren<Animator>();
         enemyRB = GetComponent<Rigidbody2D>();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		if (Time.time > nextFlipChance)
-        {
+    }
+
+    // Update is called once per frame
+    void Update() {
+        if (Time.time > nextFlipChance) {
             if (Random.Range(0, 10) > 5) {
                 flipFacing();
                 nextFlipChance = Time.time + flipTime;
             }
         }
-	}
+    }
 
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.tag == "Player")
-        {
-            if (facingRight && other.transform.position.x < transform.position.x)
-            {
+    void OnTriggerEnter2D(Collider2D other) {
+        if (other.tag == "Player") {
+            if (facingRight && other.transform.position.x < transform.position.x) {
                 flipFacing();
-            }
-            else if (!facingRight && other.transform.position.x > transform.position.x)
-            {
+            } else if (!facingRight && other.transform.position.x > transform.position.x) {
                 flipFacing();
             }
             canFlip = false;
@@ -62,18 +56,12 @@ public class EnemyMovement : MonoBehaviour {
         }
     }
 
-    void OnTriggerStay2D(Collider2D other)
-    {
-        if (other.tag == "Player")
-        {
-            if (startChargeTime < Time.time)
-            {
-                if (!facingRight)
-                {
+    void OnTriggerStay2D(Collider2D other) {
+        if (other.tag == "Player") {
+            if (startChargeTime < Time.time) {
+                if (!facingRight) {
                     enemyRB.AddForce(new Vector2(-1, 0) * enemySpeed);
-                }
-                else
-                {
+                } else {
                     enemyRB.AddForce(new Vector2(1, 0) * enemySpeed);
                 }
                 enemyAnimator.SetBool("isCharging", charging);
@@ -81,10 +69,8 @@ public class EnemyMovement : MonoBehaviour {
         }
     }
 
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (other.tag == "Player")
-        {
+    private void OnTriggerExit2D(Collider2D other) {
+        if (other.tag == "Player") {
             canFlip = true;
             charging = false;
             enemyRB.velocity = new Vector2(0f, 0f);
@@ -92,10 +78,8 @@ public class EnemyMovement : MonoBehaviour {
         }
     }
 
-    void flipFacing()
-    {
-        if (canFlip)
-        {
+    void flipFacing() {
+        if (canFlip) {
             float facingX = childSprite.transform.localScale.x;
             facingX *= -1f;
             childSprite.transform.localScale = new Vector3(facingX, childSprite.transform.localScale.y, childSprite.transform.localScale.z);
