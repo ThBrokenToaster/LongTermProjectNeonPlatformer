@@ -97,7 +97,7 @@ public class PlayerController : MonoBehaviour {
         }
 
         // Melee attack
-        if (Input.GetButtonDown("Melee") && grounded) {
+        if (Input.GetButtonDown("Melee") && grounded && playerState != State.melee) {
             attack(attackHitboxes[0]);
             playerAnim.SetTrigger("melee");
         }
