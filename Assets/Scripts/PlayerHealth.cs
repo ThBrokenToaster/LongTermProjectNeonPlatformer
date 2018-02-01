@@ -81,17 +81,6 @@ public class PlayerHealth : MonoBehaviour {
         playerASS.clip = hurtNoise;
         playerASS.Play();
         updateHealthGUI();
-
-        //if (damage > 0) {
-        //    currentHealth -= damage;
-        //    playerASS.clip = hurtNoise;
-        //    playerASS.Play();
-        //    damaged = true;
-        //    updateHealthGUI();
-        //    if (currentHealth <= 0) {
-        //        kill();
-        //    }
-        //}
     }
 
     public void heal(float amount) {

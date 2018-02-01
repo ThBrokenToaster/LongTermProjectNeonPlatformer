@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
-    //Variables for moving
+    // Variables for moving
     public float maxSpeed;
 
-    Rigidbody2D playerRB;
+    Rigidbody2D rb;
     Animator playerAnim;
     bool facingRight;
 
-    //Vars for PlasmaBolts
+    // Vars for PlasmaBolts
     public Transform hand;
     public GameObject projectile;
     public GameObject arrowFire;
@@ -20,10 +20,10 @@ public class PlayerController : MonoBehaviour {
 
     int equiped = 0;
 
-    //attacking
+    // Attacking
     public Collider2D[] attackHitboxes;
 
-    //jumping stuffs
+    // Jumping stuffs
     bool grounded = false;
     float groundCheckRadius = 0.2f;
     public LayerMask groundLayer;
@@ -32,9 +32,12 @@ public class PlayerController : MonoBehaviour {
     public float fallMultiplier = 2.5f;
     public float lowJumpMultiplier = 2f;
 
+    private enum State { idle, walk, melee };
+    private State playerState = State.idle;
+
     // Use this for initialization
     void Start() {
-        playerRB = GetComponent<Rigidbody2D>();
+        rb = GetComponent<Rigidbody2D>();
         playerAnim = GetComponent<Animator>();
 
         facingRight = true;
@@ -42,22 +45,34 @@ public class PlayerController : MonoBehaviour {
 
     void FixedUpdate() {
         grounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
-        playerAnim.SetBool("isGrounded", grounded);
+        float move = Input.GetAxisRaw("Horizontal");
 
-        playerAnim.SetFloat("verticalSpeed", playerRB.velocity.y);
+        // Set playerState
+        if (playerState != State.melee) {
+            if (move == 0f) {
+                playerState = State.idle;
+            } else {
+                playerState = State.walk;
+            }
+        }
 
-        float move = Input.GetAxis("Horizontal");
+        // Apply horizontal movement
+        if (playerState == State.walk) {
+            rb.AddForce(new Vector2(move * maxSpeed, 0));
+        }
 
-        playerAnim.SetFloat("speed", Mathf.Abs(move));
-
-        playerRB.velocity = new Vector2(move * maxSpeed, playerRB.velocity.y);
-        //playerRB.AddForce(new Vector2(move * maxSpeed, 0));
-
+        // Flip player if needed
         if (move > 0 && !facingRight) {
             flip();
         } else if (move < 0 && facingRight) {
             flip();
         }
+
+
+        // Set playAnim triggers
+        playerAnim.SetBool("isWalking", playerState == State.walk);
+        playerAnim.SetBool("isGrounded", grounded);
+        playerAnim.SetFloat("verticalSpeed", rb.velocity.y);
     }
 
     void flip() {
@@ -68,28 +83,26 @@ public class PlayerController : MonoBehaviour {
     }
 
     void Update() {
-        //jumping
+        // Jumping
         if (grounded && Input.GetButtonDown("Jump")) {
             grounded = false;
-            playerAnim.SetBool("isGrounded", grounded);
-            playerRB.AddForce(new Vector2(0, jumpHeight));
+            rb.AddForce(new Vector2(0, jumpHeight));
         }
 
-        //Smart Jump
-        if (playerRB.velocity.y < 0) {
-            playerRB.velocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
-        } else if (playerRB.velocity.y > 0 && !Input.GetButton("Jump")) {
-            playerRB.velocity += Vector2.up * Physics2D.gravity.y * (lowJumpMultiplier - 1) * Time.deltaTime;
+        // Smart Jump
+        if (rb.velocity.y < 0) {
+            rb.velocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
+        } else if (rb.velocity.y > 0 && !Input.GetButton("Jump")) {
+            rb.velocity += Vector2.up * Physics2D.gravity.y * (lowJumpMultiplier - 1) * Time.deltaTime;
         }
 
-        //melee attack
-        if (Input.GetButtonDown("Melee")) {
-
+        // Melee attack
+        if (Input.GetButtonDown("Melee") && grounded && playerState != State.melee) {
             attack(attackHitboxes[0]);
-
+            playerAnim.SetTrigger("melee");
         }
 
-        //switching Items
+        // Switching Items
         if (Input.GetButtonDown("Fire3")) {
             if (equiped < 2) {
                 equiped++;
@@ -98,21 +111,26 @@ public class PlayerController : MonoBehaviour {
             }
         }
 
-        //Plasma Bolt
+        // Plasma Bolt
         if (Input.GetButtonDown("Fire1")) {
             firePlasma();
         }
+
+        // Animation Updates
+        playerAnim.SetBool("isGrounded", grounded);
     }
 
-    //melee hit
+    // Melee hit
     void attack(Collider2D hitbox) {
         StartCoroutine(attackForTime(hitbox));
     }
 
     public IEnumerator attackForTime(Collider2D hitbox) {
+        playerState = State.melee;
         hitbox.enabled = true;
         yield return new WaitForSeconds(.5f);
         hitbox.enabled = false;
+        playerState = State.idle;
     }
 
     void firePlasma() {
