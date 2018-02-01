@@ -32,6 +32,9 @@ public class PlayerController : MonoBehaviour {
     public float fallMultiplier = 2.5f;
     public float lowJumpMultiplier = 2f;
 
+    private enum State { idle, walk, melee };
+    private State playerState = State.idle;
+
     // Use this for initialization
     void Start() {
         rb = GetComponent<Rigidbody2D>();
@@ -42,23 +45,34 @@ public class PlayerController : MonoBehaviour {
 
     void FixedUpdate() {
         grounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
-        playerAnim.SetBool("isGrounded", grounded);
-
-        playerAnim.SetFloat("verticalSpeed", rb.velocity.y);
-
         float move = Input.GetAxisRaw("Horizontal");
 
-        playerAnim.SetBool("isWalking", move != 0f);
+        // Set playerState
+        if (playerState != State.melee) {
+            if (move == 0f) {
+                playerState = State.idle;
+            } else {
+                playerState = State.walk;
+            }
+        }
 
-        rb.AddForce(new Vector2(move * maxSpeed, 0));
+        // Apply horizontal movement
+        if (playerState == State.walk) {
+            rb.AddForce(new Vector2(move * maxSpeed, 0));
+        }
 
-        
-
+        // Flip player if needed
         if (move > 0 && !facingRight) {
             flip();
         } else if (move < 0 && facingRight) {
             flip();
         }
+
+
+        // Set playAnim triggers
+        playerAnim.SetBool("isWalking", playerState == State.walk);
+        playerAnim.SetBool("isGrounded", grounded);
+        playerAnim.SetFloat("verticalSpeed", rb.velocity.y);
     }
 
     void flip() {
@@ -83,7 +97,7 @@ public class PlayerController : MonoBehaviour {
         }
 
         // Melee attack
-        if (Input.GetButtonDown("Melee")) {
+        if (Input.GetButtonDown("Melee") && grounded) {
             attack(attackHitboxes[0]);
             playerAnim.SetTrigger("melee");
         }
@@ -112,9 +126,11 @@ public class PlayerController : MonoBehaviour {
     }
 
     public IEnumerator attackForTime(Collider2D hitbox) {
+        playerState = State.melee;
         hitbox.enabled = true;
         yield return new WaitForSeconds(.5f);
         hitbox.enabled = false;
+        playerState = State.idle;
     }
 
     void firePlasma() {
