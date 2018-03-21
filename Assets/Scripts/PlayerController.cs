@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour {
 
     Rigidbody2D rb;
     Animator playerAnim;
+    public PlayerHealth health;
     bool facingRight;
 
     // Vars for PlasmaBolts
@@ -24,7 +25,7 @@ public class PlayerController : MonoBehaviour {
     public Collider2D[] attackHitboxes;
 
     // Jumping stuffs
-    bool grounded = false;
+    public bool grounded = false;
     float groundCheckRadius = 0.2f;
     public LayerMask groundLayer;
     public Transform groundCheck;
